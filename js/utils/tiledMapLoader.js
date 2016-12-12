@@ -19,6 +19,10 @@ tiledMapLoader.prototype.selectEvents = [];
 tiledMapLoader.prototype.npcs = [];
 tiledMapLoader.prototype.npcGrid = [];
 
+tiledMapLoader.prototype.collisionGroup = null;
+tiledMapLoader.prototype.eventGroup = null;
+tiledMapLoader.prototype.npcGroup = null;
+
 /**
     Loads the map
 */
@@ -45,6 +49,7 @@ tiledMapLoader.prototype.load = function(mapData, callback){
         this.bottom = this.map.createLayer('bottom');
         this.background = this.map.createLayer('background');
         var player = game.add.sprite(64, 64, 'player');
+        game.physics.enable(player, Phaser.Physics.ARCADE);
         this.foreground = this.map.createLayer('foreground');
         //resize world to match size of this layer (change later)
         //this.background.resizeWorld();
@@ -89,6 +94,10 @@ tiledMapLoader.prototype.isSpaceEmpty = function(x, y){
     Delete/remove all of the previously loaded tilemap data
 */
 tiledMapLoader.prototype.delete = function(){
+    this.collisionGroup.destroy();
+    this.eventGroup.destroy();
+    this.npcGroup.destroy();
+    
     this.bottom.destroy();
     this.background.destroy();
     this.foreground.destroy();
@@ -98,6 +107,11 @@ tiledMapLoader.prototype.delete = function(){
 
 /** Parse hitbox data from tilemap's collision Object Layer*/
 tiledMapLoader.prototype._loadCollision = function(layer){
+    //init collision group
+    this.collisionGroup = game.add.group();
+    this.collisionGroup.enableBody = true;
+    this.collisionGroup.physicsBodyType = Phaser.Physics.ARCADE;
+    
     //init collision grid
     var collisions = [];
     for(var w = 0; w < this.mapWidth; w++){
@@ -110,6 +124,14 @@ tiledMapLoader.prototype._loadCollision = function(layer){
     hitboxes = layer.objects;
     for(var i = 0; i < hitboxes.length; i++){
         var box = hitboxes[i];
+        
+        //Add to collision group
+        var spr = this.collisionGroup.create(box.x, box.y); //tiled uses same coordinate system as Phaser! :D
+        spr.width = box.width;
+        spr.height = box.height;
+        spr.body.immovable = true;
+        
+        //Split into tiles
         for(var x = 0; x < box.width; x+=this.tileSize){
             for(var y = 0; y < box.height; y+=this.tileSize){
                 tx = (x+box.x)/this.tileSize;
@@ -124,6 +146,12 @@ tiledMapLoader.prototype._loadCollision = function(layer){
 
 
 tiledMapLoader.prototype._loadEvents = function(layer){
+    //init event group
+    this.eventGroup = game.add.group();
+    this.eventGroup.enableBody = true;
+    this.eventGroup.physicsBodyType = Phaser.Physics.ARCADE;
+    
+    //init event grid
     this.events = [];
     eventGrid = [];
     for(var w = 0; w < this.mapWidth; w++){
@@ -135,6 +163,21 @@ tiledMapLoader.prototype._loadEvents = function(layer){
     evts = layer.objects;
     for(var i = 0; i < layer.objects.length; i++){
         var event = layer.objects[i];
+        
+        //Add event group
+        var evtG = this.eventGroup.create(event.x, event.y);
+        evtG.width = event.width;
+        evt.height = event.height;
+        
+        evtG.gameEventObject = {type: event.type, name: event.name};
+        if(event.type == 'warp'){
+            var id = event.name.split('_')[1];
+            var dest = event.properties.dest.split('_');
+            evtG.gameEventObject.id = id;
+            evtG.gameEventObject.destinationRoom = dest[0];
+            evtG.gameEventObject.destinationID = dest[1];
+        }
+        
         for(var x = 0; x < event.width; x+=this.tileSize){
             for(var y = 0; y < event.height; y+=this.tileSize){
                 tx = (x+event.x)/this.tileSize;
@@ -169,6 +212,12 @@ tiledMapLoader.prototype._loadEvents = function(layer){
 }
 
 tiledMapLoader.prototype._loadNPCs = function(layer){
+    //init npcGroup
+    this.npcGroup = game.add.group();
+    this.npcGroup.enableBody = true;
+    this.npcGroup.physicsBodyType = Phaser.Physics.ARCADE;
+    
+    //init npcGrid
     npcGrid = [];
     for(var w = 0; w < this.mapWidth; w++){
         npcGrid.push([])
@@ -179,21 +228,26 @@ tiledMapLoader.prototype._loadNPCs = function(layer){
     
     npcs = layer.objects;
     for(var i = 0; i < npcs.length; i++){
+        var multicall = 0;
         var npc = npcs[i];
         for(var x = 0; x < npc.width; x+=this.tileSize){ //full size of npc, should be singular
-            for(var y = 0; y < npc.height; y+=this.tileSize){
+            for(var y = 0; y < npc.height; y+=this.tileSize){ //This nested loop should only ever call once if done properly
+                multicall++;
                 tx = (x+npc.x)/this.tileSize;
                 ty = (y+npc.y)/this.tileSize;
                 //name = script name
                 //type = sprite name
+                var spr = this.npcGroup.create(npc.x, npc.y, npc.name);
+                spr.body.immovable = true;
                 mynpc = {
-                    sprite: game.add.sprite(npc.x, npc.y, npc.name), //make new instance of spite here
+                    sprite: spr, //game.add.sprite(npc.x, npc.y, npc.name), //make new instance of spite here
                     script: npc.type,
                 }
                 this.npcs.push(mynpc);
                 this.npcGrid[tx][ty] = mynpc;
             }
         }
+        if(multicall > 1) console.warn("NPCs defined through multi-tile objects; this is only best done for non-sentient npcs or large groups of the same npc");
     }
 }
 

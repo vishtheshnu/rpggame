@@ -167,15 +167,16 @@ tiledMapLoader.prototype._loadEvents = function(layer){
         //Add event group
         var evtG = this.eventGroup.create(event.x, event.y);
         evtG.width = event.width;
-        evt.height = event.height;
+        evtG.height = event.height;
         
-        evtG.gameEventObject = {type: event.type, name: event.name};
+        evtG.gameEventObject = {type: event.type, script: event.name};
         if(event.type == 'warp'){
             var id = event.name.split('_')[1];
             var dest = event.properties.dest.split('_');
             evtG.gameEventObject.id = id;
             evtG.gameEventObject.destinationRoom = dest[0];
             evtG.gameEventObject.destinationID = dest[1];
+            delete evtG.gameEventObject.script;
         }
         
         for(var x = 0; x < event.width; x+=this.tileSize){
@@ -243,6 +244,7 @@ tiledMapLoader.prototype._loadNPCs = function(layer){
                     sprite: spr, //game.add.sprite(npc.x, npc.y, npc.name), //make new instance of spite here
                     script: npc.type,
                 }
+                spr.script = npc.type;
                 this.npcs.push(mynpc);
                 this.npcGrid[tx][ty] = mynpc;
             }

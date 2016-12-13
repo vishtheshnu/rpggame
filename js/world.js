@@ -9,7 +9,7 @@ var worldState = {
     eventEnding: false,
     
     player: null,
-    playerSpeed: 10,
+    playerSpeed: 100,
     playerCorners: [],
     playerCenterCoord: {x: 0, y: 0},
     
@@ -77,15 +77,15 @@ var worldState = {
         pvel.x = 0;
         pvel.y = 0;
         if(InputHandler.left.pressed){
-            pvel.x = -100;
+            pvel.x = -this.playerSpeed;
         }else if(InputHandler.right.pressed){
-            pvel.x = 100;
+            pvel.x = this.playerSpeed;
         }
         
         if(InputHandler.up.pressed){
-            pvel.y = -100;
+            pvel.y = -this.playerSpeed;
         }else if(InputHandler.down.pressed){
-            pvel.y = 100;
+            pvel.y = this.playerSpeed;
         }
         
         /*
@@ -139,7 +139,7 @@ var worldState = {
                 npc = this.map.npcGroup.children[i];
                 if(npc.body.hitTest(x, y)){
                     console.log('script: '+npc.script);
-                    this.triggerEvent({type: 'script', script: npc.script}, event.x, event.y);
+                    this.triggerEvent(npc, event.x, event.y);
                     return;
                 }
             }
@@ -163,7 +163,7 @@ var worldState = {
                 Scripts[event.script](this, x, y);
                 break;
             case 'npc':
-                Scripts[event.script](this, x, y);
+                Scripts[event.script](this, event);
                 break;
                 
         }
@@ -178,6 +178,29 @@ var worldState = {
     
     gridSpace: function(arr, coords){
         return arr[coords.x][coords.y];
+    },
+    
+    isSpaceEmpty: function(x, y){
+        collision = this.map.collisionGroup.children;
+        for(var i = 0; i < collision.length; i++){
+            if(collision[i].body.hitTest(x, y)){
+                console.log('collision with ');
+                console.log(collision[i]);
+                return false;
+            }
+        }
+        
+        npcs = this.map.npcGroup.children;
+        for(var i = 0; i < npcs.length; i++){
+            if(npcs[i].body.hitTest(x, y)){
+                console.log('collision with ');
+                console.log(npcs[i]);
+                return false;
+            }
+        }
+        
+        console.log('space is empty');
+        return true;
     },
     
     loadMap: function(mapName, warpID){
@@ -203,7 +226,7 @@ var worldState = {
                 }
 
                 //camera fade in
-                game.camera.flash(0x000000);
+                game.camera.flash(0x000000, 200);
 
                 //Complete event
                 self.mapLoading = false;
@@ -212,7 +235,7 @@ var worldState = {
         }, this);
         
         //camera fade out
-        game.camera.fade();
+        game.camera.fade(0x000000, 200);
         
     },
     

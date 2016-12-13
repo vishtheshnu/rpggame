@@ -30,21 +30,23 @@ var Scripts = {
         (new Dialogs.dialogNode('Select event test!')).execute(this._endEvent);
     },
     
-    npcTest: function(world, x, y){ //going to act like a rock
+    npcTest: function(world, sprite, x, y){ //going to act like a rock
         world.eventActive = true;
         this.world = world;
         
-        var sprite = world.map.npcGrid[x][y].sprite;
+        //var sprite = world.map.npcGrid[x][y].sprite;
+        var x = sprite.body.x; var y = sprite.body.y;
         var facing = Player.getFacingVector();
-        var dx = facing.x+x; var dy = facing.y+y;
-        if(world.map.isSpaceEmpty(dx, dy)){
+        var dx = facing.x*world.map.tileSize+sprite.body.x; var dy = facing.y*world.map.tileSize+sprite.body.y;
+        //console.log("x, y, dx, dy = ("+x+","+y+") , ("+dx+","+dy+")");
+        if(world.isSpaceEmpty(dx, dy) && !game.tweens.isTweening(sprite)){
             var tween = game.add.tween(sprite);
-            tween.to({x: dx*world.map.tileSize, y: dy*world.map.tileSize}, 300, null, true);
-            world.map.collision[dx][dy] = true;
-            this.world.map.npcGrid[dx][dy] = this.world.map.npcGrid[x][y];
-            this.world.map.npcGrid[x][y] = null;
+            tween.to({x: dx, y: dy}, 300, null, true);
+            //world.map.collision[dx][dy] = true;
+            //this.world.map.npcGrid[dx][dy] = this.world.map.npcGrid[x][y];
+            //this.world.map.npcGrid[x][y] = null;
             tween.onComplete.addOnce(function(){
-                this.world.map.collision[x][y] = false;
+                //this.world.map.collision[x][y] = false;
             }, this);
         }
         this._endEvent();

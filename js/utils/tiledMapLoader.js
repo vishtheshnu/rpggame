@@ -50,7 +50,7 @@ tiledMapLoader.prototype.load = function(mapData, callback){
         this.background = this.map.createLayer('background');
         var player = game.add.sprite(64, 64, 'player');
         game.physics.enable(player, Phaser.Physics.ARCADE);
-        this.foreground = this.map.createLayer('foreground');
+        
         //resize world to match size of this layer (change later)
         //this.background.resizeWorld();
 
@@ -73,6 +73,7 @@ tiledMapLoader.prototype.load = function(mapData, callback){
                 else if(layerName == 'npcs')
                     self._loadNPCs(json.layers[i]);
             }
+            self.foreground = self.map.createLayer('foreground'); //loading foreground AFTER npcs
             console.log('Completed loading tilemap');
             callback(player, self);
         });
@@ -245,6 +246,7 @@ tiledMapLoader.prototype._loadNPCs = function(layer){
                     script: npc.type,
                 }
                 spr.script = npc.type;
+                spr.type = 'npc';
                 this.npcs.push(mynpc);
                 this.npcGrid[tx][ty] = mynpc;
             }

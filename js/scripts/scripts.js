@@ -1,5 +1,6 @@
 /*
     Parameters for each script is the world, and the coordinates of the script object
+    For npcs, only pass in the world, and the npc sprite itself (which contains reference to position)
 */
 
 var Scripts = {
@@ -30,7 +31,7 @@ var Scripts = {
         (new Dialogs.dialogNode('Select event test!')).execute(this._endEvent);
     },
     
-    npcTest: function(world, sprite, x, y){ //going to act like a rock
+    npcTest: function(world, sprite){ //going to act like a rock
         world.eventActive = true;
         this.world = world;
         
@@ -42,15 +43,8 @@ var Scripts = {
         if(world.isSpaceEmpty(dx, dy) && !game.tweens.isTweening(sprite)){
             var tween = game.add.tween(sprite);
             tween.to({x: dx, y: dy}, 300, null, true);
-            //world.map.collision[dx][dy] = true;
-            //this.world.map.npcGrid[dx][dy] = this.world.map.npcGrid[x][y];
-            //this.world.map.npcGrid[x][y] = null;
-            tween.onComplete.addOnce(function(){
-                //this.world.map.collision[x][y] = false;
-            }, this);
         }
         this._endEvent();
-        //(new Dialogs.dialogNode('Hello, this is an npc!')).execute(this._endEvent);
     },
     
     _endEvent: function(){

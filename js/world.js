@@ -78,14 +78,18 @@ var worldState = {
         pvel.y = 0;
         if(InputHandler.left.pressed){
             pvel.x = -this.playerSpeed;
+            Player.directionFacing = 'left';
         }else if(InputHandler.right.pressed){
             pvel.x = this.playerSpeed;
+            Player.directionFacing = 'right';
         }
         
         if(InputHandler.up.pressed){
             pvel.y = -this.playerSpeed;
+            Player.directionFacing = 'up';
         }else if(InputHandler.down.pressed){
             pvel.y = this.playerSpeed;
+            Player.directionFacing = 'down';
         }
         
         /*
@@ -118,18 +122,19 @@ var worldState = {
     
     updatePlayerSelection: function(){
         if(InputHandler.spacebar.clicked){
-            x = this.player.body.x+this.player.body.width/2;
-            y = this.player.body.y+this.player.body.height/2;
+            var x = this.player.body.x+this.player.body.width/2;
+            var y = this.player.body.y+this.player.body.height/2;
+            var ts = this.map.tileSize;
             switch(Player.directionFacing){
-                case 'left':    x -= this.map.tileSize; break;
-                case 'right':   x += this.map.tileSize; break;
-                case 'up':      y -= this.map.tileSize; break;
-                case 'down':    y += this.map.tileSize; break;
+                case 'left':    x -= ts; var x2 = x; var y2 = y%ts > ts/2 ? y+ts : y-ts; break;
+                case 'right':   x += ts; var x2 = x; var y2 = y%ts > ts/2 ? y+ts : y-ts; break;
+                case 'up':      y -= ts; var x2 = x%ts > ts/2 ? x+ts : x-ts; var y2 = y; break;
+                case 'down':    y += ts; var x2 = x%ts > ts/2 ? x+ts : x-ts; var y2 = y; break;
             }
             
             for(var i = 0; i < this.map.eventGroup.children.length; i++){
                 event = this.map.eventGroup.children[i];
-                if(event.body.hitTest(x, y)){
+                if(event.body.hitTest(x, y) || event.body.hitTest(x2, y2)){
                     this.triggerEvent(event.gameEventObject, event.x, event.y);
                     return;
                 }
@@ -137,7 +142,7 @@ var worldState = {
             
             for(var i = 0; i < this.map.npcGroup.children.length; i++){
                 npc = this.map.npcGroup.children[i];
-                if(npc.body.hitTest(x, y)){
+                if(npc.body.hitTest(x, y) || npc.body.hitTest(x2, y2)){
                     console.log('script: '+npc.script);
                     this.triggerEvent(npc, event.x, event.y);
                     return;

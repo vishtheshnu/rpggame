@@ -19,5 +19,30 @@ var Player = {
         return {x: x, y: y, add: function(vec){return {x: this.x+vec.x, y: this.y+vec.y}}};
     },
     
+    saveGame: function(file){
+        //Serialize inventory & quests
+        var inv = JSON.stringify(this.Inventory);
+        var quests = JSON.stringify(this.Quests);
+        localStorage.setItem(file+'-inventory', inv);
+        localStorage.setItem(file+'-quests', quests);
+    },
+    
+    loadGame: function(file){
+        this.Inventory = JSON.parse(localStorage.getItem(file+'-inventory'));
+        this.Quests = JSON.parse(localStorage.getItem(file+'-quests'));
+    },
+    
+    Inventory: {
+        gear: [],
+        tools: [],
+        resources: [],
+        keyItems: [],
+        
+    },
+    
+    Quests: {
+        active: [],
+        completed: [],
+    },
     
 }

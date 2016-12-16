@@ -25,15 +25,22 @@ var Player = {
         var quests = JSON.stringify(this.Quests);
         localStorage.setItem(file+'-inventory', inv);
         localStorage.setItem(file+'-quests', quests);
+        localStorage.setItem(file+'-map', worldState.mapName);
+        localStorage.setItem(file+'-coordinates', worldState.player.body.x+'-'+worldState.player.body.y);
     },
     
     loadGame: function(file){
         this.Inventory = JSON.parse(localStorage.getItem(file+'-inventory'));
         this.Quests = JSON.parse(localStorage.getItem(file+'-quests'));
+        x = localStorage.getItem(file+'-coordinates').split('-')[0];
+        y = localStorage.getItem(file+'-coordinates').split('-')[1];
+        worldState.loadMap(localStorage.getItem(file+'-map'), 0, x, y);
     },
     
     Inventory: {
-        gear: [],
+        categories: ['gear', 'tools', 'resources', 'keyItems'],
+        categoriesNames: ['Gear', 'Tools', 'Resources', 'Key Items'],
+        gear: [{name: 'First Item!', desc: 'A generic item'}, {name: 'Second Item', desc: 'Another generic description!'}],
         tools: [],
         resources: [],
         keyItems: [],
@@ -41,6 +48,10 @@ var Player = {
     },
     
     Quests: {
+        categories: ['active', 'completed'],
+        categoriesNames: ['Active', 'Completed'],
+        activeIndeces: [],
+        completedIndeces: [],
         active: [],
         completed: [],
     },

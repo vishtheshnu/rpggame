@@ -6,13 +6,17 @@ var InputHandler = {
     up: null,
     down: null,
     
-    tapTime: 50,
+    spacebar: null,
+    pause: null,
+    I: null, O: null, P: null,
+    
+    tapTime: 200,
     
     init: function(){
         var kb = Phaser.Keyboard;
         
         this.left = {
-            key: kb.LEFT,       //corresponding keyboard key object
+            key: kb.A,       //corresponding keyboard key object
             pressed: false,     //true if currently pressed down
             clicked: false,     //true on first update loop of key being pressed
             tapped: false,      //true for first tapTime milliseconds of key being pressed
@@ -20,7 +24,7 @@ var InputHandler = {
         };
         
         this.right = {
-            key: kb.RIGHT,
+            key: kb.D,
             pressed: false,
             clicked: false,
             tapped: false,
@@ -28,7 +32,7 @@ var InputHandler = {
         };
         
         this.up = {
-            key: kb.UP,
+            key: kb.W,
             pressed: false,
             clicked: false,
             tapped: false,
@@ -36,7 +40,7 @@ var InputHandler = {
         };
         
         this.down = {
-            key: kb.DOWN,
+            key: kb.S,
             pressed: false,
             clicked: false,
             tapped: false,
@@ -51,7 +55,39 @@ var InputHandler = {
             timeElapsed: 0.0,
         };
         
-        this.keys = [this.left, this.right, this.up, this.down, this.spacebar];
+        this.pause = {
+            key: kb.ESC,
+            pressed: false,
+            clicked: false,
+            tapped: false,
+            timeElapsed: 0.0,
+        };
+        
+        this.I = {
+            key: kb.I,
+            pressed: false,
+            clicked: false,
+            tapped: false,
+            timeElapsed: 0.0,
+        };
+        
+        this.O = {
+            key: kb.O,
+            pressed: false,
+            clicked: false,
+            tapped: false,
+            timeElapsed: 0.0,
+        };
+        
+        this.P = {
+            key: kb.P,
+            pressed: false,
+            clicked: false,
+            tapped: false,
+            timeElapsed: 0.0,
+        };
+        
+        this.keys = [this.left, this.right, this.up, this.down, this.spacebar, this.pause];
     },
     
     update: function(){

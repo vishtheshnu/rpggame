@@ -1,6 +1,8 @@
 /*
     Parameters for each script is the world, and the coordinates of the script object
     For npcs, only pass in the world, and the npc sprite itself (which contains reference to position)
+    
+    DON'T CALL END EVENT UNTIL SCRIPT HAS EXECUTED TO COMPLETION, INCLUDING TWEENS AND ANY ACTION THAT PROGRESS AFTER CALLS TO IT HAVE BEEN MADE
 */
 
 var Scripts = {
@@ -43,10 +45,17 @@ var Scripts = {
         if(world.isSpaceEmpty(dx, dy) && !game.tweens.isTweening(sprite)){
             var tween = game.add.tween(sprite);
             tween.to({x: dx, y: dy}, 300, null, true);
+            tween.onComplete.addOnce(function(){
+                this._endEvent();
+            }, this);
         }
-        this._endEvent();
     },
     
+    /*Room 1*/
+    
+    
+    
+    /*Helper Functions*/
     _endEvent: function(){
         this.world.eventEnding = true;
     }

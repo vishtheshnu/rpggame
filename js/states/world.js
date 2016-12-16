@@ -3,6 +3,8 @@ var worldState = {
     fpsCounter: null,
     
     map: null,
+    mapSaved: false,
+    mapName: '',
     mapLoading: true,
     eventLastActivated: null,
     eventActive: false,
@@ -16,14 +18,28 @@ var worldState = {
     preload: function(){game.time.advancedTiming = true;},
     
     create: function(){
-        //Set up arcade physics
-        game.physics.startSystem(Phaser.Physics.ARCADE);
+        console.log('creating world');
+        this.mapLoading = true;
         
         //Load starting map
         var self = this;
-        this.map = new tiledMapLoader(this.mapData['room3'], function(player, map){
+        
+        //Set up arcade physics
+        game.physics.startSystem(Phaser.Physics.ARCADE);
+        
+        console.log('loading map')
+        if(this.mapName == ''){
+            this.mapName = 'room3';
+        }
+        this.map = new tiledMapLoader(this.mapData[this.mapName], function(player, map){
             self.player = player;
             game.camera.follow(player);
+            
+            if(self.mapSaved){
+                self.loadMapContents(map);
+                self.mapSaved = false;
+            }
+            
             self.mapLoading = false;
         });
         
@@ -47,6 +63,7 @@ var worldState = {
         }
         if(this.eventActive)
             return;
+        
         //if event active, return
         //update player direction facing
         this.updatePlayerDirection();
@@ -54,6 +71,14 @@ var worldState = {
         this.updatePlayerMovement();
         //update player select
         this.updatePlayerSelection();
+        
+        //update accessing inventory/quests/saving
+        if(InputHandler.pause.clicked){
+            console.log(this.player.body);
+            this.saveMapContents();
+            game.state.start('quests');
+            
+        }
     },
     
     updatePlayerDirection: function(){
@@ -208,7 +233,7 @@ var worldState = {
         return true;
     },
     
-    loadMap: function(mapName, warpID){
+    loadMap: function(mapName, warpID, x, y){
         //Initial setup
         this.mapLoading = true;
         
@@ -216,6 +241,7 @@ var worldState = {
         game.camera.onFadeComplete.addOnce(function(){
             self.map.delete();
             self.player.kill();
+            this.mapName = mapName;
             self.map = new tiledMapLoader(this.mapData[mapName], function(player, map){
                 self.player = player;
                 for(var i = 0; i < map.eventGroup.children.length; i++){
@@ -229,7 +255,13 @@ var worldState = {
                         break;
                     }
                 }
-
+                
+                //If loading from non-warp (eg. game load)
+                if(x != undefined && y != undefined){
+                    self.player.x = x;
+                    self.player.y = y;
+                }
+                
                 //camera fade in
                 game.camera.flash(0x000000, 200);
 
@@ -242,6 +274,63 @@ var worldState = {
         //camera fade out
         game.camera.fade(0x000000, 200);
         
+    },
+    
+    /*Save & Load position of */
+    
+    savePlayer: {x: 0, y: 0},
+    saveBounds: [],
+    saveEvents: [],
+    saveNPCs: [],
+    
+    saveMapContents: function(){
+        //Reset Variables
+        this.saveBounds = [];
+        this.saveEvents = [];
+        this.saveNPCs = [];
+        
+        //Save location of each entity to a variable
+        this.savePlayer.x = this.player.x;
+        this.savePlayer.y = this.player.y;
+        for(var i = 0; i < this.map.collisionGroup.children.length; i++){
+            var item = this.map.collisionGroup.children[i];
+            this.saveBounds.push({x: item.body.x, y: item.body.y});
+        }
+        for(var i = 0; i < this.map.eventGroup.children.length; i++){
+            var item = this.map.eventGroup.children[i];
+            this.saveEvents.push({x: item.body.x, y: item.body.y});
+        }
+        for(var i = 0; i < this.map.npcGroup.children.length; i++){
+            var item = this.map.npcGroup.children[i];
+            this.saveNPCs.push({x: item.body.x, y: item.body.y});
+        }
+        console.log('Saved map: '+this.saveBounds.length+' collisions, '+this.saveEvents.length+' events, '+this.saveNPCs.length+' npcs');
+        this.mapSaved = true;
+    },
+    
+    loadMapContents: function(map){
+        console.log('Loading map: '+this.map.collisionGroup.children.length+' collisions, '+this.map.eventGroup.children.length+' events, '
+                    +this.map.npcGroup.children.length+' npcs');
+        //Set location of each entity from saved variable
+        this.player.x = this.savePlayer.x;
+        this.player.y = this.savePlayer.y;
+        for(var i = 0; i < this.map.collisionGroup.length; i++){
+            var item = this.map.collisionGroup.children[i];
+            item.x = this.saveBounds[i].x;
+            item.y = this.saveBounds[i].y;
+        }
+        for(var i = 0; i < this.map.eventGroup.children.length; i++){
+            var item = this.map.eventGroup.children[i];
+            item.x = this.saveEvents[i].x;
+            item.y = this.saveEvents[i].y;
+        }
+        for(var i = 0; i < this.map.npcGroup.children.length; i++){
+            var item = this.map.npcGroup.children[i];
+            item.x = this.saveNPCs[i].x;
+            item.y = this.saveNPCs[i].y;
+            console.log('npc set');
+            console.log(item);
+        }
     },
     
     mapData: {

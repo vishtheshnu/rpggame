@@ -50,7 +50,7 @@ var questState = {
         var catBack = game.add.sprite(0, 0, 'item-back');
         catBack.scale.setTo(8.0/5.0, 2);
         this.categories = game.add.group();
-        this.categories.x = 200;
+        this.categories.x = 200-this.category*200;
         this.cl = 400;
         //Categories
         var text = game.add.text(0, 0, 'Active');
@@ -70,7 +70,10 @@ var questState = {
         //Description 'Texture'
         this.itemBack = game.add.sprite(300, 100, 'item-back');
         this.itemBack.scale.setTo(1, 10);
-        this.flavorText = game.add.text(350, 150, '');
+        this.flavorText = game.add.text(0, 0, this.getDesc());
+        this.flavorText.setTextBounds(350, 150, 400, 500);
+        this.flavorText.wordWrap = true;
+        this.flavorText.wordWrapWidth = 400;
         
     },
     
@@ -101,10 +104,8 @@ var questState = {
                 subGroup.setAll('visible', false);
             }
         }
-    },
-    
-    createFlavorText: function(){
-        this.flavorText.text = Player.Quests[Player.Quests.categories[this.category]].desc;
+        if(this.flavorText)
+            this.flavorText.text = this.getDesc();
     },
     
     update: function(){
@@ -123,7 +124,7 @@ var questState = {
             if(this.getIndex() > 0){
                 this.completeTweens();
                 this.indeces[this.category]--;
-                this.flavorText.text = Player.Quests[Player.Quests.categories[this.category]][this.getIndex()].desc;
+                this.flavorText.text = this.getDesc();
                 
                 //Tweens
                 this.itemsTween = game.add.tween(this.items);
@@ -146,7 +147,7 @@ var questState = {
             if(this.getIndex() < this.items.children.length-1){
                 this.completeTweens();
                 this.indeces[this.category]++;
-                this.flavorText.text = Player.Quests[Player.Quests.categories[this.category]][this.getIndex()].desc;
+                this.flavorText.text = this.getDesc();
                 
                 //Tweens
                 this.itemsTween = game.add.tween(this.items);
@@ -210,9 +211,11 @@ var questState = {
         return this.indeces[this.category];
     },
     
-    
-    /*Selecting an item from a different window*/
-    selectItem(){
-        
+    getDesc: function(){
+        if(Player.Quests[Player.Quests.categories[this.category]].length > 0){
+            var quest = Player.Quests[Player.Quests.categories[this.category]][this.getIndex()];
+            return quest.steps[quest.stage];
+        }else
+            return '';
     },
 }

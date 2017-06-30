@@ -75,6 +75,16 @@ tiledMapLoader.prototype.load = function(mapData, callback){
             }
             self.foreground = self.map.createLayer('foreground'); //loading foreground AFTER npcs
             console.log('Completed loading tilemap');
+            
+            //Map is loaded, call NPC preload scripts
+            var npcList = self.npcGroup.children;
+            for(var i = 0; i <npcList.length; i++){
+                if(npcList[i].preload != undefined){
+                    console.log('preloading '+npcList[i].script);
+                    Scripts[npcList[i].preload](npcList[i]);
+                }
+            }
+            
             callback(player, self);
         });
         
@@ -82,6 +92,13 @@ tiledMapLoader.prototype.load = function(mapData, callback){
     
     loader.start();
     
+}
+
+tiledMapLoader.prototype.redrawMap = function(){
+    this.bottom.moveUp();
+    this.background.moveUp();
+    this.foreground.moveUp();
+    //this.npcGroup.moveUp();
 }
 
 tiledMapLoader.prototype.isSpaceEmpty = function(x, y){
@@ -95,6 +112,7 @@ tiledMapLoader.prototype.isSpaceEmpty = function(x, y){
     Delete/remove all of the previously loaded tilemap data
 */
 tiledMapLoader.prototype.delete = function(){
+    console.log("Destroying tilemap!");
     this.collisionGroup.destroy();
     this.eventGroup.destroy();
     this.npcGroup.destroy();
@@ -137,7 +155,7 @@ tiledMapLoader.prototype._loadCollision = function(layer){
             for(var y = 0; y < box.height; y+=this.tileSize){
                 tx = (x+box.x)/this.tileSize;
                 ty = (y+box.y)/this.tileSize;
-                collisions[tx][ty] = true;
+                //collisions[tx][ty] = true;
             }
         }
     }
@@ -170,7 +188,7 @@ tiledMapLoader.prototype._loadEvents = function(layer){
         evtG.width = event.width;
         evtG.height = event.height;
         
-        evtG.gameEventObject = {type: event.type, script: event.name};
+        evtG.gameEventObject = {type: event.type, script: event.name, body: event};
         if(event.type == 'warp'){
             var id = event.name.split('_')[1];
             var dest = event.properties.dest.split('_');
@@ -189,20 +207,20 @@ tiledMapLoader.prototype._loadEvents = function(layer){
                         var id = event.name.split('_')[1]; //gets warp id #
                         var dest = event.properties.dest.split('_'); //room name, warp id #
                         myevt = {type: 'warp', id: id, destinationRoom: dest[0], destinationID: dest[1], x:tx, y: ty};
-                        eventGrid[tx][ty] = myevt;
+                        //eventGrid[tx][ty] = myevt;
                         this.events.push(myevt);
                         break;
                     
                     case 'script':
                         var myevt = {type: 'script', name: event.name};
-                        eventGrid[tx][ty] = myevt;
+                        //eventGrid[tx][ty] = myevt;
                         this.events.push(myevt);
                         break;
                         
                     case 'activate': //event that requires the user to select to activate
                         console.log('Activate event found and added to eventGrid!')
                         var myevt = {type: 'activate', name: event.name};
-                        eventGrid[tx][ty] = myevt;
+                        //eventGrid[tx][ty] = myevt;
                         this.selectEvents.push(myevt);
                         break;
                 }
@@ -232,6 +250,7 @@ tiledMapLoader.prototype._loadNPCs = function(layer){
     for(var i = 0; i < npcs.length; i++){
         var multicall = 0;
         var npc = npcs[i];
+        console.log(npc);
         for(var x = 0; x < npc.width; x+=this.tileSize){ //full size of npc, should be singular
             for(var y = 0; y < npc.height; y+=this.tileSize){ //This nested loop should only ever call once if done properly
                 multicall++;
@@ -244,11 +263,13 @@ tiledMapLoader.prototype._loadNPCs = function(layer){
                 mynpc = {
                     sprite: spr, //game.add.sprite(npc.x, npc.y, npc.name), //make new instance of spite here
                     script: npc.type,
+                    preload: npc.properties.preload,
                 }
                 spr.script = npc.type;
                 spr.type = 'npc';
+                spr.preload = npc.properties.preload;
                 this.npcs.push(mynpc);
-                this.npcGrid[tx][ty] = mynpc;
+                //this.npcGrid[tx][ty] = mynpc;
             }
         }
         if(multicall > 1) console.warn("NPCs defined through multi-tile objects; this is only best done for non-sentient npcs or large groups of the same npc");

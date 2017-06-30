@@ -40,7 +40,7 @@ var Player = {
     Inventory: {
         categories: ['gear', 'tools', 'resources', 'keyItems'],
         categoriesNames: ['Gear', 'Tools', 'Resources', 'Key Items'],
-        gear: [{name: 'First Item!', desc: 'A generic item'}, {name: 'Second Item', desc: 'Another generic description!'}],
+        gear: [],
         tools: [],
         resources: [],
         keyItems: [],

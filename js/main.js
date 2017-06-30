@@ -1,4 +1,4 @@
-var game = new Phaser.Game(800, 600, Phaser.AUTO, '');
+var game = new Phaser.Game(1280, 720, Phaser.AUTO, ''); //previously 800, 600
 
 InputHandler.init();
 

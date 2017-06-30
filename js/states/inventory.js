@@ -52,6 +52,7 @@ var inventoryState = {
         var catBack = game.add.sprite(0, 0, 'item-back');
         catBack.scale.setTo(8.0/5.0, 2);
         this.categories = game.add.group();
+        this.categories.x = -this.category*200;
         this.cl = (800/Player.Inventory.categoriesNames.length);
         //Categories
         for(var i = 0; i < Player.Inventory.categoriesNames.length; i++){
@@ -67,8 +68,12 @@ var inventoryState = {
         //Description 'Texture'
         this.itemBack = game.add.sprite(300, 100, 'item-back');
         this.itemBack.scale.setTo(1, 10);
-        this.flavorText = game.add.text(350, 150, Player.Inventory[Player.Inventory.categories[this.category]][this.getIndex()].desc);
-        
+        this.flavorText = game.add.text(0, 0, '');
+        if(Player.Inventory[Player.Inventory.categories[this.category]].length > 0)
+            this.flavorText.text = Player.Inventory[Player.Inventory.categories[this.category]][this.getIndex()].desc;
+        this.flavorText.setTextBounds(350, 150, 400, 500);
+        this.flavorText.wordWrap = true;
+        this.flavorText.wordWrapWidth = 400;
     },
     
     createItems: function(){
@@ -78,6 +83,8 @@ var inventoryState = {
                 this.items.children[0].destroy();
             }
         }
+        if(this.flavorText)
+            this.flavorText.text = '';
         
         this.items.x = 50;
         this.items.y = 150+this.itemHeight*(2 - this.getIndex());
@@ -96,6 +103,8 @@ var inventoryState = {
                 subGroup.setAll('visible', false);
             }
         }
+        if(Player.Inventory[Player.Inventory.categories[this.category]].length > 0)
+            this.flavorText.text = Player.Inventory[Player.Inventory.categories[this.category]][this.getIndex()].desc;
     },
     
     update: function(){

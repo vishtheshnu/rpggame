@@ -87,7 +87,7 @@ var InputHandler = {
             timeElapsed: 0.0,
         };
         
-        this.keys = [this.left, this.right, this.up, this.down, this.spacebar, this.pause];
+        this.keys = [this.left, this.right, this.up, this.down, this.spacebar, this.pause, this.I, this.O, this.P];
     },
     
     update: function(){

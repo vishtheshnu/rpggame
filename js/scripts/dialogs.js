@@ -61,10 +61,11 @@ var Dialogs = {
                             $('#dialogChoices').append('<br/>');
                         }
                     }else if(this.next == null){ //end of dialog
-                        Dialogs.continue = function(){this.endDialog(); callback.call(Scripts);}
+                        var self = this; //self doesn't work in some places b/c endDialog belongs to the parent object Dialogs, not dialogNode! TODO fix it up
+                        Dialogs.continue = function(){if(self.script) self.script(); this.endDialog(); callback.call(Scripts);}
                     }else{ //normal dialog
                         var self = this;
-                        Dialogs.continue = function(){self.next.execute(callback);}
+                        Dialogs.continue = function(){if(self.script) self.script(); self.next.execute(callback);}
                     }
                 }
                 
@@ -78,8 +79,9 @@ var Dialogs = {
         //Initialize Dialog
         if(!this.dialogActive){
             this.dialogActive = true;
-            this.textbox = game.add.sprite(50, 350-game.camera.y, 'textbox');
-            this.text = game.add.text(100, 400-game.camera.y, "", {wordWrap: true, wordWrapWidth: 600});
+            this.textbox = game.add.sprite(50+game.camera.x, game.camera.y+game.camera.height-250, 'textbox');
+            this.text = game.add.text(100+game.camera.x, game.camera.y+game.camera.height-200, "", {wordWrap: true, wordWrapWidth: 600});
+            console.log('Beginning dialog: camera = (' + game.camera.x + ',' + game.camera.y + '), textbox: (' + (50+game.camera.x) + ',' + (350-game.camera.y)+')');
         }
     },
     

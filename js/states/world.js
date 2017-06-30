@@ -10,8 +10,11 @@ var worldState = {
     eventActive: false,
     eventEnding: false,
     
+    questUpdateText: null,
+    questUpdateTween: null,
+    
     player: null,
-    playerSpeed: 100,
+    playerSpeed: 300,
     playerCorners: [],
     playerCenterCoord: {x: 0, y: 0},
     
@@ -24,12 +27,14 @@ var worldState = {
         //Load starting map
         var self = this;
         
+        
+        
         //Set up arcade physics
         game.physics.startSystem(Phaser.Physics.ARCADE);
         
         console.log('loading map')
         if(this.mapName == ''){
-            this.mapName = 'room3';
+            this.mapName = 'map1';
         }
         this.map = new tiledMapLoader(this.mapData[this.mapName], function(player, map){
             self.player = player;
@@ -40,6 +45,9 @@ var worldState = {
                 self.mapSaved = false;
             }
             
+            //Initialize questUpdateText
+            this.questUpdateText = game.add.text(0, 0, '');
+            
             self.mapLoading = false;
         });
         
@@ -47,6 +55,23 @@ var worldState = {
     
     render: function(){
         game.debug.text(game.time.fps, 2, 14);
+    },
+    
+    setQuestText: function(msg, quest){
+        //TODO: Set color of text to white, make it fade out after a bit, keep updating its location inside update() to be relative to the camera
+        console.log('setQuestText called!');
+        if(this.questUpdateTween != null)
+            tween.stop();
+        if(this.questUpdateText == null)
+            this.questUpdateText = game.add.text(0, 0, '');
+        this.questUpdateTween = game.add.tween(this.questUpdateText);
+        
+        this.questUpdateText.text = msg+':\n'+quest.steps[quest.stage];
+        this.questUpdateText.alpha = 0;
+        
+        var tween = this.questUpdateTween;
+        tween = game.add.tween(this.questUpdateText);
+        tween.to({alpha: 1}, 1000, Phaser.Easing.Elastic.InOut, true);
     },
     
     update: function(){
@@ -73,10 +98,15 @@ var worldState = {
         this.updatePlayerSelection();
         
         //update accessing inventory/quests/saving
-        if(InputHandler.pause.clicked){
-            console.log(this.player.body);
+        if(InputHandler.I.clicked){
+            this.saveMapContents();
+            game.state.start('inventory');
+        }
+        else if(InputHandler.O.clicked){
             this.saveMapContents();
             game.state.start('quests');
+            
+        }else if(InputHandler.P.clicked){
             
         }
     },
@@ -130,7 +160,6 @@ var worldState = {
         
         //Check for event overlap
         var isOverlap = game.physics.arcade.overlap(this.player, this.map.eventGroup, function(player, event){
-            //console.log(event == this.eventLastActivated);
             if(event == this.eventLastActivated)
                 return;
             if(event.gameEventObject.type == 'activate'){
@@ -138,7 +167,7 @@ var worldState = {
             }
             //Activate event
             this.eventLastActivated = event;
-            this.triggerEvent(event.gameEventObject, event.x, event.y);
+            this.triggerEvent(event.gameEventObject);
         }, null, this);
         if(!isOverlap)
             this.eventLastActivated = null;
@@ -149,7 +178,7 @@ var worldState = {
         if(InputHandler.spacebar.clicked){
             var x = this.player.body.x+this.player.body.width/2;
             var y = this.player.body.y+this.player.body.height/2;
-            var ts = this.map.tileSize;
+            var ts = this.player.body.width;
             switch(Player.directionFacing){
                 case 'left':    x -= ts; var x2 = x; var y2 = y%ts > ts/2 ? y+ts : y-ts; break;
                 case 'right':   x += ts; var x2 = x; var y2 = y%ts > ts/2 ? y+ts : y-ts; break;
@@ -159,26 +188,37 @@ var worldState = {
             
             for(var i = 0; i < this.map.eventGroup.children.length; i++){
                 event = this.map.eventGroup.children[i];
-                if(event.body.hitTest(x, y) || event.body.hitTest(x2, y2)){
-                    this.triggerEvent(event.gameEventObject, event.x, event.y);
+                if(event.body.hitTest(x, y)){
+                    this.triggerEvent(event.gameEventObject);
+                    return;
+                }
+            }
+            for(var i = 0; i < this.map.eventGroup.children.length; i++){
+                event = this.map.eventGroup.children[i];
+                if(event.body.hitTest(x2, y2)){
+                    this.triggerEvent(event.gameEventObject);
                     return;
                 }
             }
             
             for(var i = 0; i < this.map.npcGroup.children.length; i++){
                 npc = this.map.npcGroup.children[i];
-                if(npc.body.hitTest(x, y) || npc.body.hitTest(x2, y2)){
-                    console.log('script: '+npc.script);
-                    this.triggerEvent(npc, event.x, event.y);
+                if(npc.body.hitTest(x, y)){
+                    this.triggerEvent(npc);
+                    return;
+                }
+            }
+            for(var i = 0; i < this.map.npcGroup.children.length; i++){
+                npc = this.map.npcGroup.children[i];
+                if(npc.body.hitTest(x2, y2)){
+                    this.triggerEvent(npc);
                     return;
                 }
             }
         }
     },
     
-    triggerEvent: function(event, x, y){
-        //console.log("Event Triggered!");
-        //console.log(event);
+    triggerEvent: function(event){
         this.eventActive = true;
         this.player.body.velocity.x = 0;
         this.player.body.velocity.y = 0;
@@ -187,13 +227,13 @@ var worldState = {
                 this.loadMap(event.destinationRoom, event.destinationID);
                 break;
             case 'script': 
-                Scripts[event.script](this, x, y);
+                Scripts[event.script](event.body);
                 break;
             case 'activate': 
-                Scripts[event.script](this, x, y);
+                Scripts[event.script](event.body);
                 break;
             case 'npc':
-                Scripts[event.script](this, event);
+                Scripts[event.script](event);
                 break;
                 
         }
@@ -214,8 +254,6 @@ var worldState = {
         collision = this.map.collisionGroup.children;
         for(var i = 0; i < collision.length; i++){
             if(collision[i].body.hitTest(x, y)){
-                console.log('collision with ');
-                console.log(collision[i]);
                 return false;
             }
         }
@@ -223,13 +261,10 @@ var worldState = {
         npcs = this.map.npcGroup.children;
         for(var i = 0; i < npcs.length; i++){
             if(npcs[i].body.hitTest(x, y)){
-                console.log('collision with ');
-                console.log(npcs[i]);
                 return false;
             }
         }
         
-        console.log('space is empty');
         return true;
     },
     
@@ -247,10 +282,8 @@ var worldState = {
                 for(var i = 0; i < map.eventGroup.children.length; i++){
                     event = map.eventGroup.children[i];
                     if(event.gameEventObject.type == 'warp' && event.gameEventObject.id == warpID){
-                        console.log('warp id found! '+event.body.x+' , '+event.body.y);
                         self.player.x = event.body.x;
                         self.player.y = event.body.y;
-                        console.log('player location: '+self.player.x+' , '+self.player.y);
                         self.eventLastActivated = event;
                         break;
                     }
@@ -261,6 +294,15 @@ var worldState = {
                     self.player.x = x;
                     self.player.y = y;
                 }
+                
+                //Initialize questUpdateText
+                if(this.questUpdateText != null)
+                    this.questUpdateText.destroy();
+                
+                this.questUpdateText = game.add.text(0, 0, '');
+                
+                //Camera follows Player
+                game.camera.follow(player);
                 
                 //camera fade in
                 game.camera.flash(0x000000, 200);
@@ -304,13 +346,10 @@ var worldState = {
             var item = this.map.npcGroup.children[i];
             this.saveNPCs.push({x: item.body.x, y: item.body.y});
         }
-        console.log('Saved map: '+this.saveBounds.length+' collisions, '+this.saveEvents.length+' events, '+this.saveNPCs.length+' npcs');
         this.mapSaved = true;
     },
     
     loadMapContents: function(map){
-        console.log('Loading map: '+this.map.collisionGroup.children.length+' collisions, '+this.map.eventGroup.children.length+' events, '
-                    +this.map.npcGroup.children.length+' npcs');
         //Set location of each entity from saved variable
         this.player.x = this.savePlayer.x;
         this.player.y = this.savePlayer.y;
@@ -328,14 +367,16 @@ var worldState = {
             var item = this.map.npcGroup.children[i];
             item.x = this.saveNPCs[i].x;
             item.y = this.saveNPCs[i].y;
-            console.log('npc set');
-            console.log(item);
         }
     },
     
     mapData: {
         room3: {name: 'room3', tilesets:['tiles']},
         room2: {name: 'room2', tilesets:['tiles']},
+        map1: {name: 'map1', tilesets:['mytiles']},
+        map2: {name: 'map2', tilesets:['mytiles']},
+        map3: {name: 'map3', tilesets:['mytiles']},
+        map4: {name: 'map4', tilesets:['mytiles']},
         
     },
 }

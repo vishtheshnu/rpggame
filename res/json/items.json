@@ -1,0 +1,29 @@
+[
+    {
+        "name": "Iron Ore",
+        "category": "resource",
+        "spriteIndex": 0,
+        "description": "Can be refined into hard metal."
+    },
+    
+    {
+        "name": "Coal",
+        "category": "resource",
+        "spriteIndex": 1,
+        "description": "Can be used in the metal refinement process."
+    },
+    
+    {
+        "name": "Treasure",
+        "category": "key item",
+        "spriteIndex": 2,
+        "description": "Shiny! I think Mr. Blue was looking for this..."
+    },
+    
+    {
+        "name": "Trinket",
+        "category": "key item",
+        "spriteIndex": 3,
+        "description": "A gift from Mr. Blue for finding his treasure."
+    }
+]

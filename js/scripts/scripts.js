@@ -52,6 +52,7 @@ var Scripts = {
     map1_signMiddle: function(body){
         var dlg = sclib.dialog.create('Halfway there to Mr. Blue\'s house!');//new Dialogs.dialogNode('Halfway there to Mr. Blue\'s house!');
         dlg.execute(sclib.endEvent);
+        sclib.items.add(ItemDB.items[0]);
     },
     
     map1_signHouse: function(body){
@@ -198,7 +199,7 @@ var Scripts = {
             sclib.quests.start(0);
         }
         
-        sclib.items.add({name:'Treasure', desc:'The treasure Mr. Blue was looking for.'}, 'keyItems');
+        sclib.items.add(ItemDB.items[2]);
         sclib.quests.setStage(0, 3);
         sclib.dialog.execute(dlg, sclib.endEvent);
         
@@ -324,48 +325,67 @@ var sclib = {
     },
     
     items: {
-        /*Item object to add, category to add it under (number for index, string for category name)*/
-        add: function(item, category){
-            if(typeof category == 'number')
-                category = Player.Inventory.categories[category];
-            Player.Inventory[category].push(item);
+        /*Adds item to inventory.
+        item- item object to add (acquireable from ItemDB.items list)
+        Returns: boolean value on whether item was addable to inventory. Returns true if successful, false if no space*/
+        add: function(item){
+            for(var i = 0; i < Player.Inventory.maxSize; i++){
+                if(Player.Inventory.items[i] == null){
+                    Player.Inventory.items[i] = item;
+                    menuPanelInventory.refreshInventory();
+                    return true;
+                }
+            }
+            
+            return false;
+        },
+        
+        /*
+        Returns the index of the parameter item inside the player's inventory. Returns -1 if not found
+        item- The item to search for, compares by using '=='
+        */
+        find: function(item){
+            for(var i = 0; i < Player.Inventory.maxSize; i++){
+                if(Player.Inventory.items[i] == item)
+                    return i;
+            }
+            return -1;
         },
         
         /*
         Find an item inside the parameter category that fulfills the parameter search function.
         func- search function; should take parameter object (item) and return true if the item being looked for is passed in, false otherwise.
-        category- (optional) category to search in. Can be unfilled (searches all categories), a number(searches category of that index), or an array of string 
-            (searches each category named in the array)
+        
         returns the object found,otherwise returns null
         */
-        find: function(func, category){
-            if(typeof category == 'number')
-                category = [Player.Inventory.categories[category]];
-            if(category instanceof String)
-                category = [category];
-            for(var i = 0; i < category.length; i++){
-                var x = null;
-                if(x = Player.Inventory[category[i]].find(func)) //single = means assign x the result of find. If checks value of x. If undefined, it's false.
-                    return x;
+        findByFunction: function(func){
+            for(var i = 0; i < Player.Inventory.maxSize; i++){
+                if(func(Player.Inventory.items[i]))
+                    return Player.Inventory.items[i];
             }
             return null;
         },
         
+        /*Removes an item based on its index*/
+        remove: function(index){
+            var toret = Player.Inventory.items[index];
+            Player.Inventory.items[index] = null;
+            menuPanelInventory.refreshInventory();
+            return toret;
+        },
+        
         /**
-        Finds and removes an item inside the parameter category that fulfills the parameter search function.
-        Same parameters and workings as find(), but removes the object instead of *just* returning it.
+        Finds and removes an item that fulfills the parameter search function.
+        Same parameters and workings as findByFunction(), but removes the object instead of *just* returning it.
         Returns deleted object if found, null otherwise.
         */
-        remove: function(func, category){
-            if(typeof category == 'number')
-                category = [Player.Inventory.categories[category]];
-            else if(typeof category == 'string')
-                category = [category];
-            for(var i = 0; i < category.length; i++){
-                var x = null;
-                if(x = Player.Inventory[category[i]].find(func)){ //single = means assign x the result of find. If checks value of x. If undefined, it's false.
-                    Player.Inventory[category[i]].splice(Player.Inventory[category[i]].indexOf(x), 1);
-                    return x;
+        removeByFunction: function(func){
+            for(var i = 0; i < Player.Inventory.maxSize; i++){
+                if(func(Player.Inventory.items[i])){
+                    var toret = Player.Inventory.items[i];
+                    Player.Inventory.items[i] = null;
+                    menuPanelInventory.refreshInventory();
+                    return toret;
                 }
             }
             return null;

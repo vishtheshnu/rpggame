@@ -9,17 +9,20 @@ var loadState = {
         game.load.image('tiles', 'res/tiles_village.png');
         game.load.image('mytiles', 'res/mytiles.png');
         game.load.image('textbox', 'res/textbox.png');
+        game.load.spritesheet('items', 'res/item-sprites.png', 64, 64);
         
         //Inventory/Quest/Load screen images
         game.load.image('info-back', 'res/info-back.png');
         game.load.image('highlight', 'res/highlight.png');
         game.load.image('item-back', 'res/item-back.png');
+        game.load.image('inventory-back', 'res/inventory-back.png');
         
         //NPC Images
         game.load.image('boulder', 'res/boulder.png');
         
         //JSON Files
         game.load.json('allQuests', 'res/json/quests.json');
+        game.load.json('itemData', 'res/json/items.json');
     },
     
     create: function(){
@@ -31,6 +34,9 @@ var loadState = {
         }
         console.log(QuestDB.quests);
         
+        //Parse Item List JSON
+        ItemDB.items = game.cache.getJSON('itemData');
+        
         //Go into fullscreen mode
         game.scale.fullScreenScaleMode = Phaser.ScaleManager.SHOW_ALL;
         game.input.onDown.add(this.gofull, this);
@@ -38,7 +44,8 @@ var loadState = {
         game.add.text(0, 0, "Click to start game & go fullscreen", style);
         
         /*To actually go into fullscreen mode, make sure to switch to the 'world' state at the end of gofull*/
-        
+        //Start overworld
+        game.state.start('world');
         
     },
     
@@ -53,8 +60,7 @@ var loadState = {
             game.scale.startFullScreen(false);
         }
         
-        //Start overworld
-        game.state.start('world');
+        
         
     }
 }

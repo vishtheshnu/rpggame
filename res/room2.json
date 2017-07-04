@@ -64,7 +64,7 @@
                  "rotation":0,
                  "type":"",
                  "visible":true,
-                 "width":16,
+                 "width":32,
                  "x":112,
                  "y":240
                 }, 
@@ -80,7 +80,7 @@
                  "type":"",
                  "visible":true,
                  "width":16,
-                 "x":128,
+                 "x":144,
                  "y":192
                 }],
          "opacity":1,
@@ -106,7 +106,7 @@
                  "rotation":0,
                  "type":"warp",
                  "visible":true,
-                 "width":16,
+                 "width":32,
                  "x":112,
                  "y":224
                 }],
@@ -119,13 +119,13 @@
         }, 
         {
          "draworder":"topdown",
-         "height":16,
+         "height":0,
          "name":"npcs",
          "objects":[],
          "opacity":1,
          "type":"objectgroup",
          "visible":true,
-         "width":16,
+         "width":0,
          "x":0,
          "y":0
         }],

@@ -62,6 +62,7 @@ tiledMapLoader.prototype.load = function(mapData, callback){
             self.mapWidth = json.width;
             self.mapHeight = json.height;
             game.world.setBounds(0, 0, self.tileSize*self.mapWidth, self.tileSize*self.mapHeight);
+            game.camera.bounds = null;
 
             //get collision & events
             for(var i = 0; i < json.layers.length; i++){

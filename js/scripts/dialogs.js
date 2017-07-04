@@ -80,7 +80,7 @@ var Dialogs = {
         if(!this.dialogActive){
             this.dialogActive = true;
             this.textbox = game.add.sprite(50+game.camera.x, game.camera.y+game.camera.height-250, 'textbox');
-            this.text = game.add.text(100+game.camera.x, game.camera.y+game.camera.height-200, "", {wordWrap: true, wordWrapWidth: 600});
+            this.text = game.add.text(100+game.camera.x, game.camera.y+game.camera.height-200, "", {wordWrap: true, wordWrapWidth: 1080});
             console.log('Beginning dialog: camera = (' + game.camera.x + ',' + game.camera.y + '), textbox: (' + (50+game.camera.x) + ',' + (350-game.camera.y)+')');
         }
     },

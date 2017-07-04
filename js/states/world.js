@@ -38,7 +38,7 @@ var worldState = {
         }
         this.map = new tiledMapLoader(this.mapData[this.mapName], function(player, map){
             self.player = player;
-            game.camera.follow(player);
+            game.camera.follow(player, Phaser.Camera.FOLLOW_LOCKON);
             
             if(self.mapSaved){
                 self.loadMapContents(map);
@@ -51,6 +51,7 @@ var worldState = {
             self.mapLoading = false;
         });
         
+        menuDisplay.create();
     },
     
     render: function(){
@@ -99,8 +100,9 @@ var worldState = {
         
         //update accessing inventory/quests/saving
         if(InputHandler.I.clicked){
-            this.saveMapContents();
-            game.state.start('inventory');
+            //this.saveMapContents();
+            //game.state.start('inventory');
+            menuDisplay.toggle();
         }
         else if(InputHandler.O.clicked){
             this.saveMapContents();

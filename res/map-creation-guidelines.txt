@@ -1,0 +1,20 @@
+Guideines for map creation
+
+Layers (displayed bottom to top):
+	bottom (tile)
+	background (tile)
+	foreground (tile)
+	collision (object)
+		no special values
+	events (object)
+		name: if warp: warp name (room name + "_" + warp id), else: script function name
+			room_name = name of file the map is saved as
+			warp_id = unique index for the warp for this room.
+		type: "warp" = warp script, "script" = step on to activate, "activate" = click on to activate
+		dest: name field of warp script to transport to. (used only if the script is a warp script)
+		
+	npcs (object)
+		name: name of sprite to use as the npc
+		type: script to run when npc is activated
+			format: roomName + "_" + identifier, identifier can be any unique js function name
+		preload: (optional) script to run once the map is loaded, but before it is displayed

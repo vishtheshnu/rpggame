@@ -38,13 +38,16 @@ var Player = {
     },
     
     Inventory: {
+        items: new Array(36),
+        maxSize: 36,
+        /*
         categories: ['gear', 'tools', 'resources', 'keyItems'],
         categoriesNames: ['Gear', 'Tools', 'Resources', 'Key Items'],
         gear: [],
         tools: [],
         resources: [],
         keyItems: [],
-        
+        */
     },
     
     Quests: {

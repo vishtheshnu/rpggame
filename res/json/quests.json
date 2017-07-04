@@ -1,0 +1,13 @@
+[
+    {
+        "name": "First Quest!",
+        "steps": [
+            "Talk to Mr. Blue about the treasure.",
+            "Go to the maze South of Mr. Blue's house.",
+            "Navigate the maze to find the treasure.",
+            "Bring the treasure to Mr. Blue.",
+            "Mr. Blue found the location of burried treasure, and you successfully brought it to him."
+        ]
+    }
+    
+]

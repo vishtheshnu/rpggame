@@ -9,3 +9,5 @@ game.state.add('inventory', inventoryState);
 game.state.add('quests', questState);
 
 game.state.start('load');
+
+

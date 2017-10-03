@@ -9,6 +9,7 @@ var worldState = {
     eventLastActivated: null,
     eventActive: false,
     eventEnding: false,
+    loadLocation: {mapName: '', x: 100, y: 100},
     
     questUpdateText: null,
     questUpdateTween: null,
@@ -17,6 +18,7 @@ var worldState = {
     playerSpeed: 300,
     playerCorners: [],
     playerCenterCoord: {x: 0, y: 0},
+    cameraFollowSprite: null,
     
     preload: function(){game.time.advancedTiming = true;},
     
@@ -27,16 +29,21 @@ var worldState = {
         //Load starting map
         var self = this;
         
-        
-        
         //Set up arcade physics
         game.physics.startSystem(Phaser.Physics.ARCADE);
         
+        //Set up dialog object
+        Dialogs.init();
+        
         console.log('loading map')
-        if(this.mapName == ''){
-            this.mapName = 'map1';
+        if(this.loadLocation.mapName == ''){
+            this.loadLocation.mapName = 'map1';
         }
-        this.map = new tiledMapLoader(this.mapData[this.mapName], function(player, map){
+        
+        var x = self.loadLocation.x;
+        var y = self.loadLocation.y;
+        
+        this.map = new tiledMapLoader(this.mapData[this.loadLocation.mapName], function(player, map){
             self.player = player;
             game.camera.follow(player, Phaser.Camera.FOLLOW_LOCKON);
             
@@ -45,8 +52,14 @@ var worldState = {
                 self.mapSaved = false;
             }
             
+            //Set player location to previously saved value
+            
+            self.player.x = x;
+            self.player.y = y;
+            
             //Initialize questUpdateText
-            this.questUpdateText = game.add.text(0, 0, '');
+            this.questUpdateText = game.add.text(0, 0, '', {fill: 'white'});
+            this.questUpdateText.fixedToCamera = true;
             
             self.mapLoading = false;
         });
@@ -56,23 +69,31 @@ var worldState = {
     
     render: function(){
         game.debug.text(game.time.fps, 2, 14);
+        if(this.player){
+            game.debug.text(this.player.x+','+this.player.y, 2, 30);
+        }
     },
     
     setQuestText: function(msg, quest){
         //TODO: Set color of text to white, make it fade out after a bit, keep updating its location inside update() to be relative to the camera
-        console.log('setQuestText called!');
         if(this.questUpdateTween != null)
-            tween.stop();
-        if(this.questUpdateText == null)
-            this.questUpdateText = game.add.text(0, 0, '');
+            this.questUpdateTween.stop();
+        if(this.questUpdateText == null){ //shouldn't be called
+            this.questUpdateText = game.add.text(0, 0, '', {fill: 'white'});
+            this.questUpdateText.fixedToCamera = true;
+        }
         this.questUpdateTween = game.add.tween(this.questUpdateText);
         
         this.questUpdateText.text = msg+':\n'+quest.steps[quest.stage];
-        this.questUpdateText.alpha = 0;
+        this.questUpdateText.alpha = 0.0;
+        this.questUpdateText.bringToTop();
         
         var tween = this.questUpdateTween;
         tween = game.add.tween(this.questUpdateText);
-        tween.to({alpha: 1}, 1000, Phaser.Easing.Elastic.InOut, true);
+        tween.to({alpha: 1.0}, 1000, Phaser.Easing.Elastic.Linear, true, 0, 0, false);
+        tween.yoyo(true, 2000);//yoyo to become invisible again
+        
+        
     },
     
     update: function(){
@@ -104,6 +125,7 @@ var worldState = {
             //game.state.start('inventory');
             menuDisplay.toggle();
         }
+        /*
         else if(InputHandler.O.clicked){
             this.saveMapContents();
             game.state.start('quests');
@@ -111,6 +133,7 @@ var worldState = {
         }else if(InputHandler.P.clicked){
             
         }
+        */
     },
     
     updatePlayerDirection: function(){
@@ -273,19 +296,29 @@ var worldState = {
     loadMap: function(mapName, warpID, x, y){
         //Initial setup
         this.mapLoading = true;
+        this.loadLocation.mapName = mapName;
+        
+        //Hide menu/inventory
+        menuDisplay.hide();
         
         var self = this;
         game.camera.onFadeComplete.addOnce(function(){
             self.map.delete();
             self.player.kill();
-            this.mapName = mapName;
-            self.map = new tiledMapLoader(this.mapData[mapName], function(player, map){
+            
+            //console.log(self.loadLocation.mapName);
+            //console.log(self.mapData);
+            //console.log(self.mapData[this.loadLocation.mapName]);
+            self.map = new tiledMapLoader(self.mapData[self.loadLocation.mapName], function(player, map){
                 self.player = player;
+                //self.cameraFollowSprite = game.add.sprite();
                 for(var i = 0; i < map.eventGroup.children.length; i++){
                     event = map.eventGroup.children[i];
                     if(event.gameEventObject.type == 'warp' && event.gameEventObject.id == warpID){
                         self.player.x = event.body.x;
                         self.player.y = event.body.y;
+                        self.loadLocation.x = event.body.x;
+                        self.loadLocation.y = event.body.y;
                         self.eventLastActivated = event;
                         break;
                     }
@@ -298,13 +331,16 @@ var worldState = {
                 }
                 
                 //Initialize questUpdateText
-                if(this.questUpdateText != null)
-                    this.questUpdateText.destroy();
-                
-                this.questUpdateText = game.add.text(0, 0, '');
+                if(self.questUpdateText != null){
+                    self.questUpdateText.bringToTop();
+                }
                 
                 //Camera follows Player
                 game.camera.follow(player);
+                
+                //Show Inventory if not hidden
+                if(!menuDisplay.hidden)
+                    menuDisplay.show();
                 
                 //camera fade in
                 game.camera.flash(0x000000, 200);
@@ -370,6 +406,16 @@ var worldState = {
             item.x = this.saveNPCs[i].x;
             item.y = this.saveNPCs[i].y;
         }
+    },
+    
+    /**
+        Set the loadLocation object so when the worldState is switched to in the future, it'll load the selected map
+        and place the player at the selected location
+    */
+    setLoadLocation: function(mapName, x, y){
+        this.loadLocation.mapName = mapName;
+        this.loadLocation.x = x;
+        this.loadLocation.y = y;
     },
     
     mapData: {

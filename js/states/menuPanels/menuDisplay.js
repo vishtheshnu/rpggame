@@ -7,32 +7,50 @@ var menuDisplay = {
     hidden: true,
     
     create: function(){
+        //Reset vars
+        this.panelSelected = 0;
+        this.hidden = true;
+        this.panels = [];
+        
         this.container = game.add.group();
-        var back = game.add.sprite(game.scale.width - 350, 10, 'inventory-back');
+        var back = game.add.sprite(game.scale.width - 320, 0, 'inventory-back');
         this.container.fixedToCamera = true;
         this.container.add(back);
         
         var self = this;
-        var button = game.add.text(back.x+16, back.y+16, "O");
+        var button = game.add.text(back.x+26, back.y+31, "O");
         button.inputEnabled = true;
         button.width = 64;
         button.height = 64;
         button.events.onInputDown.add(this.panelButtonClick(0), this);
         this.container.add(button);
         
-        button = game.add.text(button.x+68+16, button.y+16, "I1");
+        button = game.add.text(button.x+68, button.y, "I1");
         button.inputEnabled = true;
         button.width = 64;
         button.height = 64;
         button.events.onInputDown.add(this.panelButtonClick(1), this);
         this.container.add(button);
         
+        button = game.add.text(button.x+68, button.y, "Q");
+        button.inputEnabled = true;
+        button.width = 64;
+        button.height = 64;
+        button.events.onInputDown.add(this.panelButtonClick(2), this);
+        this.container.add(button);
+        
         //Create Panels
-        menuPanelOptions.create(back.x+22, back.y+102, 256, 576);
+        menuPanelOptions.create(back.x+35, back.y+235, 250, 450);
+        menuPanelOptions.container.visible = false;
         this.panels.push(menuPanelOptions.container);
         
-        menuPanelInventory.create(back.x+22, back.y+102, 256, 576);
+        menuPanelInventory.create(back.x+35, back.y+235, 250, 450);
+        menuPanelInventory.container.visible = false;
         this.panels.push(menuPanelInventory.container);
+        
+        menuPanelQuests.create(back.x+35, back.y+235, 250, 450);
+        menuPanelQuests.container.visible = false;
+        this.panels.push(menuPanelQuests.container);
         
         this.hide();
     },
@@ -40,10 +58,8 @@ var menuDisplay = {
     panelButtonClick: function(index){
         var self = this;
         return function(item){
-            console.log('clicked options button, index '+index);
-            //if(self.panelSelected != index){
-                self.setPanel(index);
-            //}
+            console.log('menuDisplay panel change: '+index);
+            self.setPanel(index);
         }
     },
     
@@ -51,6 +67,7 @@ var menuDisplay = {
         this.container.visible = true;
         this.panels[this.panelSelected].visible = true;
         game.world.bringToTop(this.container);
+        game.world.bringToTop(this.panels[this.panelSelected]);
     },
     
     hide: function(){
@@ -68,7 +85,6 @@ var menuDisplay = {
     },
     
     setPanel: function(panel){
-        console.log("calling setPanel; changing from "+this.panelSelected+" to "+panel);
         this.panels[this.panelSelected].visible = false;
         this.panelSelected = panel;
         this.panels[panel].visible = true;

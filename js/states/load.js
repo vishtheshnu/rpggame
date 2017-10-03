@@ -16,6 +16,7 @@ var loadState = {
         game.load.image('highlight', 'res/highlight.png');
         game.load.image('item-back', 'res/item-back.png');
         game.load.image('inventory-back', 'res/inventory-back.png');
+        game.load.image('drop-button', 'res/drop-button.png');
         
         //NPC Images
         game.load.image('boulder', 'res/boulder.png');
@@ -23,6 +24,8 @@ var loadState = {
         //JSON Files
         game.load.json('allQuests', 'res/json/quests.json');
         game.load.json('itemData', 'res/json/items.json');
+        game.load.json('dungeonData', 'res/json/dungeondata.json');
+        game.load.json('enemyData', 'res/json/enemydata.json');
     },
     
     create: function(){
@@ -47,6 +50,8 @@ var loadState = {
         //Start overworld
         game.state.start('world');
         
+        //TEMP
+        var dungeon = new Dungeon('dungeon1');
     },
     
     gofull: function(){

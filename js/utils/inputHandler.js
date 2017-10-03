@@ -1,10 +1,23 @@
 var InputHandler = {
     keys: [],
+    numbers: [],
+    numAssign: [],
     
     left: null,
     right: null,
     up: null,
     down: null,
+    
+    one: null,
+    two: null,
+    three: null,
+    four: null,
+    five: null,
+    six: null,
+    seven: null,
+    eight: null,
+    nine: null,
+    zero: null,
     
     spacebar: null,
     pause: null,
@@ -87,7 +100,21 @@ var InputHandler = {
             timeElapsed: 0.0,
         };
         
+        this.numbers = [kb.ONE, kb.TWO, kb.THREE, kb.FOUR, kb.FIVE, kb.SIX, kb.SEVEN, kb.EIGHT, kb.NINE, kb.ZERO];
+        this.numAssign = [this.one, this.two, this.three, this.four, this.five, this.six, this.seven, this.eight, this.nine, this.zero];
+        
         this.keys = [this.left, this.right, this.up, this.down, this.spacebar, this.pause, this.I, this.O, this.P];
+        for(var i = 0; i < this.numbers.length; i++){
+            this.numAssign[i] = {
+                key: this.numbers[i],
+                pressed: false,
+                clicked: false,
+                tapped: false,
+                timeElapsed: 0.0,
+            };
+            this.keys.push(this.numAssign[i]);
+        }
+        
     },
     
     update: function(){

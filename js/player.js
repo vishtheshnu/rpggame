@@ -25,20 +25,26 @@ var Player = {
         var quests = JSON.stringify(this.Quests);
         localStorage.setItem(file+'-inventory', inv);
         localStorage.setItem(file+'-quests', quests);
-        localStorage.setItem(file+'-map', worldState.mapName);
-        localStorage.setItem(file+'-coordinates', worldState.player.body.x+'-'+worldState.player.body.y);
+        localStorage.setItem(file+'-map', worldState.loadLocation.mapName);
+        localStorage.setItem(file+'-coordinateX', worldState.player.body.x);
+        localStorage.setItem(file+'-coordinateY', worldState.player.body.y);
+        console.log('SAVING: x,y = '+worldState.player.body.x+'-'+worldState.player.body.y);
     },
     
     loadGame: function(file){
         this.Inventory = JSON.parse(localStorage.getItem(file+'-inventory'));
         this.Quests = JSON.parse(localStorage.getItem(file+'-quests'));
-        x = localStorage.getItem(file+'-coordinates').split('-')[0];
-        y = localStorage.getItem(file+'-coordinates').split('-')[1];
-        worldState.loadMap(localStorage.getItem(file+'-map'), 0, x, y);
+        var x = parseInt(localStorage.getItem(file+'-coordinateX'));
+        var y = parseInt(localStorage.getItem(file+'-coordinateY'));
+        worldState.setLoadLocation(localStorage.getItem(file+'-map'), x, y);
+        console.log(x);
+        //worldState.loadMap(localStorage.getItem(file+'-map'), 0, x, y);
+        game.state.start('world');
+        console.log('LOADING: x,y = '+x+'-'+y);
     },
     
     Inventory: {
-        items: new Array(36),
+        items: new Array(45),
         maxSize: 36,
         /*
         categories: ['gear', 'tools', 'resources', 'keyItems'],

@@ -21,7 +21,6 @@ var menuPanelOptions = {
     },
     
     gofull: function(){
-        console.log("Called gofull!");
         if (game.scale.isFullScreen)
         {
             game.scale.stopFullScreen();

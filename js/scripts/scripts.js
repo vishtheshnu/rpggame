@@ -51,6 +51,16 @@ var Scripts = {
     /*Map 1*/
     map1_signMiddle: function(body){
         var dlg = sclib.dialog.create('Halfway there to Mr. Blue\'s house!');//new Dialogs.dialogNode('Halfway there to Mr. Blue\'s house!');
+        console.log(dlg);
+        
+        dlg.chain({text: 'Yes or No?', choices: [
+            {text: "Yes", next: new Dialogs.dialogNode('you chose yes')},
+            {text: "No", next: new Dialogs.dialogNode('you chose no')},
+            {text: "Maybe So", next: new Dialogs.dialogNode('you chose maybe so')},
+            {text: "I don't know", next: new Dialogs.dialogNode('you chose idk')},
+            {text: "wtf?", next: new Dialogs.dialogNode('you chose wtf')},
+        ]});
+        
         dlg.execute(sclib.endEvent);
         sclib.items.add(ItemDB.items[0]);
     },
@@ -144,6 +154,18 @@ var Scripts = {
             (new Dialogs.dialogNode('Well hello there! Come on in!')).execute(sclib.endEvent);
         else
             sclib.endEvent();
+    },
+    
+    saveblock: function(body){
+        var dlg = sclib.dialog.create(
+            {text: 'What would you like to do?',
+            choices: [
+                {text: 'Save', next: sclib.dialog.create({text: 'Saving...', script: function(){Player.saveGame('testFile')}})},
+                {text: 'Load', next: sclib.dialog.create({text: 'Loading...', script: function(){Player.loadGame('testFile')}})},
+                {text: 'Nothing', next: sclib.dialog.create('Ok. See you later!')}
+            ],
+            });
+        dlg.execute(sclib.endEvent);
     },
     
     /*Map 4*/
@@ -275,7 +297,8 @@ var sclib = {
             var quest = QuestDB.quests[index];
             Player.Quests.activeIndeces.push(index);
             Player.Quests.active.push(quest);
-            //worldState.setQuestText("Quest Start", quest);
+            menuPanelQuests.refresh();
+            worldState.setQuestText("Quest Start", quest);
         },
         
         complete: function(index){
@@ -287,6 +310,7 @@ var sclib = {
                 Player.Quests.activeIndeces.splice(ind, 1);
                 Player.Quests.active.splice(ind, 1);
             }
+            menuPanelQuests.refresh();
         },
         getStage: function(index){
             var ind = Player.Quests.activeIndeces.indexOf(index);
@@ -301,7 +325,8 @@ var sclib = {
         setStage: function(index, step){
             var quest = Player.Quests.active[Player.Quests.activeIndeces.indexOf(index)];
             quest.stage = step;
-            //worldState.setQuestText("Quest Start", quest);
+            menuPanelQuests.refresh();
+            worldState.setQuestText("Quest Update", quest);
         },
 
         isActive: function(index){

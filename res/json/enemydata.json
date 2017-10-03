@@ -1,0 +1,9 @@
+[
+    {
+        "name": "rat",
+        "tileset": "rat",
+        "comment_stats": "[health, attack, defense, special attack, special defense, speed]",
+        "stats": [3, 1, 0, 0, 0, 1],
+        "strategy": "reckless"
+    }
+]

@@ -35,7 +35,7 @@
         }, 
         {
          "draworder":"topdown",
-         "height":8,
+         "height":0,
          "name":"collision",
          "objects":[
                 {
@@ -146,13 +146,13 @@
          "opacity":1,
          "type":"objectgroup",
          "visible":true,
-         "width":8,
+         "width":0,
          "x":0,
          "y":0
         }, 
         {
          "draworder":"topdown",
-         "height":8,
+         "height":0,
          "name":"events",
          "objects":[
                 {
@@ -188,13 +188,13 @@
          "opacity":1,
          "type":"objectgroup",
          "visible":true,
-         "width":8,
+         "width":0,
          "x":0,
          "y":0
         }, 
         {
          "draworder":"topdown",
-         "height":8,
+         "height":0,
          "name":"npcs",
          "objects":[
                 {
@@ -211,15 +211,30 @@
                  "width":64,
                  "x":96,
                  "y":128
+                }, 
+                {
+                 "height":64,
+                 "id":12,
+                 "name":"player",
+                 "properties":
+                    {
+
+                    },
+                 "rotation":0,
+                 "type":"saveblock",
+                 "visible":true,
+                 "width":64,
+                 "x":320,
+                 "y":128
                 }],
          "opacity":1,
          "type":"objectgroup",
          "visible":true,
-         "width":8,
+         "width":0,
          "x":0,
          "y":0
         }],
- "nextobjectid":12,
+ "nextobjectid":13,
  "orientation":"orthogonal",
  "properties":
     {

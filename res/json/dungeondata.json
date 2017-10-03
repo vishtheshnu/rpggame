@@ -1,0 +1,22 @@
+{
+    "dungeon1": {
+        "floors": 1,
+        "tileset": "normal",
+        "complexity": [
+            {
+                "maxArea": 300,
+                "roomSize": 7,
+                "obstacleRate": 10,
+                "itemRate": 5,
+                "enemyRate": 5,
+                "items": [
+                    {"id": 0, "weight": 5}
+                ],
+                "enemies": [
+                    {"id": 0, "weight": 1}
+                ],
+                "floors": 1
+            }
+        ]
+    }
+}
